@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
+```typescript
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
 
 export interface BeautyConsultation {
