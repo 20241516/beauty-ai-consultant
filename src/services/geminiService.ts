@@ -42,9 +42,12 @@ export async function getBeautyConsultation(
     The language of the response should be Korean.
   `;
 
+  const modelName = "gemini-2.0-flash";
+  console.log(`Using model: ${modelName}`);
+
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: modelName,
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -72,16 +75,16 @@ export async function getBeautyConsultation(
     console.error("Gemini API Error Details:", error);
     
     let errorMessage = "분석 중 오류가 발생했습니다.";
-    if (error.message?.includes("API key not valid")) {
-      errorMessage = "입력된 API 키가 유효하지 않습니다. Vercel 환경 변수에서 키를 다시 확인하고 'Redeploy' 해주세요.";
-    } else if (error.message?.includes("quota")) {
+    const errorBody = error.message || "";
+    
+    if (errorBody.includes("denied access") || errorBody.includes("403")) {
+      errorMessage = "구글 프로젝트 접근이 거부되었습니다. 학교 계정 대신 개인 Gmail 계정으로 새로운 API 키를 발급받아 Vercel에 등록해 보세요.";
+    } else if (errorBody.includes("API key not valid")) {
+      errorMessage = "입력된 API 키가 유효하지 않습니다. 키를 다시 확인하고 Vercel에서 'Redeploy' 해주세요.";
+    } else if (errorBody.includes("quota")) {
       errorMessage = "API 사용량이 초과되었습니다. 잠시 후 다시 시도해주세요.";
-    } else if (error.message?.includes("safety")) {
-      errorMessage = "부적절한 요청으로 판단되어 AI가 응답을 거부했습니다.";
-    } else if (error.message?.includes("fetch")) {
-      errorMessage = "네트워크 연결에 실패했습니다. 인터넷 상태를 확인해주세요.";
     } else {
-      errorMessage = `에러 상세: ${error.message || "알 수 없는 서버 오류"}`;
+      errorMessage = `에러 상세: ${errorBody}`;
     }
     
     throw new Error(errorMessage);
