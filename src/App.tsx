@@ -24,7 +24,7 @@ import {
   Snowflake,
   Thermometer
 } from 'lucide-react';
-import { getBeautyConsultation, BeautyConsultation } from './services/geminiService';
+import { getBeautyConsultation, BeautyConsultation } from './geminiService';
 
 // Custom Cursor Component
 const CustomCursor = () => {
