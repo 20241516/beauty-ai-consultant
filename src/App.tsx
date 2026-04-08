@@ -121,6 +121,7 @@ export default function App() {
   const [customWeather, setCustomWeather] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<BeautyConsultation | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const tpoOptions = [
     { id: '소개팅', label: '소개팅', icon: <Heart className="w-4 h-4" /> },
@@ -152,12 +153,14 @@ export default function App() {
 
     setLoading(true);
     setResult(null);
+    setError(null);
     try {
       const data = await getBeautyConsultation(finalTpo, outfitColor, finalWeather);
       setResult(data);
-    } catch (error) {
-      console.error('Consultation failed:', error);
-      alert('분석 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } catch (err) {
+      console.error('Consultation failed:', err);
+      const msg = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -367,6 +370,40 @@ export default function App() {
                 <p className="text-rose-gold font-serif text-2xl italic tracking-tight">당신만의 뷰티 솔루션을 큐레이팅 중입니다</p>
                 <p className="text-gray-400 text-[10px] uppercase tracking-[0.4em]">Curating your bespoke aesthetic profile</p>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Error State */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="magazine-card p-8 border-red-200 bg-red-50/30 text-red-600 space-y-4 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <Sparkles className="w-12 h-12" />
+              </div>
+              <div className="flex items-center gap-3 font-serif italic text-xl">
+                <span className="w-8 h-px bg-red-300" />
+                <span>System Notice</span>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-light leading-relaxed max-w-2xl">
+                  {error}
+                </p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-red-400">
+                  Please check your configuration and try again
+                </p>
+              </div>
+              <button 
+                onClick={() => setError(null)}
+                className="text-[10px] uppercase tracking-widest font-bold border-b border-red-300 pb-1 hover:text-red-800 transition-colors"
+              >
+                Dismiss Report
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
