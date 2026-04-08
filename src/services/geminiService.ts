@@ -61,13 +61,29 @@ export async function getBeautyConsultation(
       },
     });
 
-    if (!response.text) {
+    const text = response.text;
+
+    if (!text) {
       throw new Error("AI로부터 응답을 받지 못했습니다.");
     }
 
-    return JSON.parse(response.text);
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    return JSON.parse(text);
+  } catch (error: any) {
+    console.error("Gemini API Error Details:", error);
+    
+    let errorMessage = "분석 중 오류가 발생했습니다.";
+    if (error.message?.includes("API key not valid")) {
+      errorMessage = "입력된 API 키가 유효하지 않습니다. Vercel 환경 변수에서 키를 다시 확인하고 'Redeploy' 해주세요.";
+    } else if (error.message?.includes("quota")) {
+      errorMessage = "API 사용량이 초과되었습니다. 잠시 후 다시 시도해주세요.";
+    } else if (error.message?.includes("safety")) {
+      errorMessage = "부적절한 요청으로 판단되어 AI가 응답을 거부했습니다.";
+    } else if (error.message?.includes("fetch")) {
+      errorMessage = "네트워크 연결에 실패했습니다. 인터넷 상태를 확인해주세요.";
+    } else {
+      errorMessage = `에러 상세: ${error.message || "알 수 없는 서버 오류"}`;
+    }
+    
+    throw new Error(errorMessage);
   }
 }
